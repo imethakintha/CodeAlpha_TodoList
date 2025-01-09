@@ -5,6 +5,7 @@ import PropTypes from 'prop-types';
 
 const TaskItem = ({ task, fetchTasks }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [categories] = useState([]);
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description,
@@ -70,15 +71,18 @@ const TaskItem = ({ task, fetchTasks }) => {
             onChange={onChange}
           ></textarea>
           <select
-            name="category"
-            className="p-2 border rounded"
-            value={category}
-            onChange={onChange}
-          >
-            <option value="Work">Work</option>
-            <option value="Personal">Personal</option>
-            <option value="Others">Others</option>
-          </select>
+          name="category"
+          className="p-2 border rounded"
+          value={category}
+          onChange={onChange}
+        >
+          <option value="Others">Others</option>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
           <input
             type="date"
             name="dueDate"
@@ -158,7 +162,6 @@ const TaskItem = ({ task, fetchTasks }) => {
     </div>
   );
 };
-
 
 
 TaskItem.propTypes = {

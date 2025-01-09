@@ -1,24 +1,26 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const Task = require('../models/Task.js');
-const { protect } = require('../middleware/auth.js');
+const Task = require("../models/Task.js");
+const { protect } = require("../middleware/auth.js");
 
 router.use(protect);
 
-router.get('/', async (req, res) => {
+router.get("/", async (req, res) => {
   try {
-    const tasks = await Task.find({ user: req.user.id }).sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user.id }).sort({
+      createdAt: -1,
+    });
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-router.get('/:id', getTask, (req, res) => {
+router.get("/:id", getTask, (req, res) => {
   res.json(res.task);
 });
 
-router.post('/', async (req, res) => {
+router.post("/", async (req, res) => {
   const { title, description, category, dueDate } = req.body;
 
   const task = new Task({
@@ -37,7 +39,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-router.patch('/:id', getTask, async (req, res) => {
+router.patch("/:id", getTask, async (req, res) => {
   const { title, description, completed, category, dueDate } = req.body;
 
   if (title != null) {
@@ -64,27 +66,25 @@ router.patch('/:id', getTask, async (req, res) => {
   }
 });
 
-
-router.delete('/:id', getTask, async (req, res) => {
+router.delete("/:id", getTask, async (req, res) => {
   try {
     await res.task.remove();
-    res.json({ message: 'Deleted Task' });
+    res.json({ message: "Deleted Task" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
-
 
 async function getTask(req, res, next) {
   let task;
   try {
     task = await Task.findById(req.params.id);
     if (task == null) {
-      return res.status(404).json({ message: 'Cannot find task' });
+      return res.status(404).json({ message: "Cannot find task" });
     }
-    
+
     if (task.user.toString() !== req.user.id) {
-      return res.status(401).json({ message: 'Not authorized' });
+      return res.status(401).json({ message: "Not authorized" });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });

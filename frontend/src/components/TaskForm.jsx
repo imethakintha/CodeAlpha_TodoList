@@ -76,16 +76,7 @@ const TaskForm = ({ fetchTasks }) => {
           value={description}
           onChange={onChange}
         ></textarea>
-        <select
-          name="category"
-          className="p-2 border rounded"
-          value={category}
-          onChange={onChange}
-        >
-          <option value="Work">Work</option>
-          <option value="Personal">Personal</option>
-          <option value="Others">Others</option>
-        </select>
+       
         <input
           type="date"
           name="dueDate"

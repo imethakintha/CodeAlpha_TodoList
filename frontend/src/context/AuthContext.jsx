@@ -2,12 +2,10 @@ import { createContext, useState, useEffect } from "react";
 import axios from "axios";
 import PropTypes from "prop-types";
 
-// Create Context
-// AuthContext.js
 
 export const AuthContext = createContext();
 
-// Provider Component
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem("user");
@@ -16,7 +14,7 @@ export const AuthProvider = ({ children }) => {
 
   const [token, setToken] = useState(() => localStorage.getItem("token") || "");
 
-  // Set Axios default headers
+
   useEffect(() => {
     if (token) {
       axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -27,7 +25,7 @@ export const AuthProvider = ({ children }) => {
     }
   }, [token]);
 
-  // Set user in local storage
+
   useEffect(() => {
     if (user) {
       localStorage.setItem("user", JSON.stringify(user));
