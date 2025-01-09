@@ -1,6 +1,7 @@
 import { useContext } from 'react';
-import TaskList from '../components/TaskList.jsx';
-import { AuthContext } from '../context/AuthContext.jsx';
+import TaskList from '../components/TaskList';
+import CategoryList from '../components/CategoryList';
+import { AuthContext } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Dashboard = () => {
@@ -23,6 +24,7 @@ const Dashboard = () => {
           Logout
         </button>
       </header>
+      <CategoryList />
       <TaskList />
     </div>
   );

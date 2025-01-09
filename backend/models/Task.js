@@ -21,7 +21,7 @@ const TaskSchema = new mongoose.Schema(
     },
     category: {
       type: String,
-      enum: ['Work', 'Personal', 'Others'], // Example categories
+      enum: ['Work', 'Personal', 'Others'],
       default: 'Others',
     },
     dueDate: {

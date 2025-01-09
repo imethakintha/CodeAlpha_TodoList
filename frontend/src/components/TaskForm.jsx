@@ -1,17 +1,35 @@
-import { useState } from 'react';
-import axios from 'axios';
-import PropTypes from 'prop-types';
-
+import { useState, useEffect } from "react";
+import axios from "axios";
+import PropTypes from "prop-types";
 
 const TaskForm = ({ fetchTasks }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    category: 'Others',
-    dueDate: '',
+    title: "",
+    description: "",
+    category: "Others",
+    dueDate: "",
   });
 
+  const [categories, setCategories] = useState([]);
+
   const { title, description, category, dueDate } = formData;
+
+  const fetchCategories = async () => {
+    try {
+      const res = await axios.get("/api/categories");
+      setCategories(res.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  /**
+   * Handle input changes and update formData state
+   * @param {Object} e - Event object
+   */
 
   const onChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -21,21 +39,21 @@ const TaskForm = ({ fetchTasks }) => {
     if (!title.trim()) return;
 
     try {
-      await axios.post('/api/tasks', {
+      await axios.post("/api/tasks", {
         title,
         description,
         category,
         dueDate: dueDate ? new Date(dueDate) : null,
       });
       setFormData({
-        title: '',
-        description: '',
-        category: 'Others',
-        dueDate: '',
+        title: "",
+        description: "",
+        category: "Others",
+        dueDate: "",
       });
       fetchTasks();
     } catch (error) {
-      console.error('Error adding task:', error);
+      console.error("Error adding task:", error);
     }
   };
 
@@ -75,6 +93,19 @@ const TaskForm = ({ fetchTasks }) => {
           value={dueDate}
           onChange={onChange}
         />
+        <select
+          name="category"
+          className="p-2 border rounded"
+          value={category}
+          onChange={onChange}
+        >
+          <option value="Others">Others</option>
+          {categories.map((cat) => (
+            <option key={cat._id} value={cat.name}>
+              {cat.name}
+            </option>
+          ))}
+        </select>
         <button
           type="submit"
           className="bg-blue-500 text-white p-2 rounded hover:bg-blue-600"
@@ -91,4 +122,3 @@ TaskForm.propTypes = {
 };
 
 export default TaskForm;
-
