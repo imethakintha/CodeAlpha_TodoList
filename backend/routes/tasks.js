@@ -1,27 +1,32 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/Task.js');
+const { protect } = require('../middleware/auth.js');
 
-// GET all tasks
+router.use(protect);
+
 router.get('/', async (req, res) => {
   try {
-    const tasks = await Task.find().sort({ createdAt: -1 });
+    const tasks = await Task.find({ user: req.user.id }).sort({ createdAt: -1 });
     res.json(tasks);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
 
-// GET a single task
 router.get('/:id', getTask, (req, res) => {
   res.json(res.task);
 });
 
-// CREATE a task
 router.post('/', async (req, res) => {
+  const { title, description, category, dueDate } = req.body;
+
   const task = new Task({
-    title: req.body.title,
-    description: req.body.description,
+    user: req.user.id,
+    title,
+    description,
+    category,
+    dueDate,
   });
 
   try {
@@ -32,16 +37,23 @@ router.post('/', async (req, res) => {
   }
 });
 
-// UPDATE a task
 router.patch('/:id', getTask, async (req, res) => {
-  if (req.body.title != null) {
-    res.task.title = req.body.title;
+  const { title, description, completed, category, dueDate } = req.body;
+
+  if (title != null) {
+    res.task.title = title;
   }
-  if (req.body.description != null) {
-    res.task.description = req.body.description;
+  if (description != null) {
+    res.task.description = description;
   }
-  if (req.body.completed != null) {
-    res.task.completed = req.body.completed;
+  if (completed != null) {
+    res.task.completed = completed;
+  }
+  if (category != null) {
+    res.task.category = category;
+  }
+  if (dueDate != null) {
+    res.task.dueDate = dueDate;
   }
 
   try {
@@ -52,7 +64,7 @@ router.patch('/:id', getTask, async (req, res) => {
   }
 });
 
-// DELETE a task
+
 router.delete('/:id', getTask, async (req, res) => {
   try {
     await res.task.remove();
@@ -62,13 +74,17 @@ router.delete('/:id', getTask, async (req, res) => {
   }
 });
 
-// Middleware to get task by ID
+
 async function getTask(req, res, next) {
   let task;
   try {
     task = await Task.findById(req.params.id);
     if (task == null) {
       return res.status(404).json({ message: 'Cannot find task' });
+    }
+    
+    if (task.user.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'Not authorized' });
     }
   } catch (error) {
     return res.status(500).json({ message: error.message });

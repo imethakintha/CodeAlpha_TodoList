@@ -1,8 +1,12 @@
-
 const mongoose = require('mongoose');
 
 const TaskSchema = new mongoose.Schema(
   {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true,
+    },
     title: {
       type: String,
       required: [true, 'Please add a title'],
@@ -14,6 +18,15 @@ const TaskSchema = new mongoose.Schema(
     completed: {
       type: Boolean,
       default: false,
+    },
+    category: {
+      type: String,
+      enum: ['Work', 'Personal', 'Others'], // Example categories
+      default: 'Others',
+    },
+    dueDate: {
+      type: Date,
+      default: null,
     },
   },
   { timestamps: true }
