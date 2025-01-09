@@ -1,65 +1,78 @@
-import { createContext, useState, useEffect } from 'react';
-import axios from 'axios';
+import { createContext, useState, useEffect } from "react";
+import axios from "axios";
+import PropTypes from "prop-types";
 
 // Create Context
+// AuthContext.js
+
 export const AuthContext = createContext();
 
 // Provider Component
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
-    const savedUser = localStorage.getItem('user');
+    const savedUser = localStorage.getItem("user");
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  const [token, setToken] = useState(() => localStorage.getItem('token') || '');
+  const [token, setToken] = useState(() => localStorage.getItem("token") || "");
 
   // Set Axios default headers
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      localStorage.setItem('token', token);
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      localStorage.setItem("token", token);
     } else {
-      delete axios.defaults.headers.common['Authorization'];
-      localStorage.removeItem('token');
+      delete axios.defaults.headers.common["Authorization"];
+      localStorage.removeItem("token");
     }
   }, [token]);
 
   // Set user in local storage
   useEffect(() => {
     if (user) {
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("user", JSON.stringify(user));
     } else {
-      localStorage.removeItem('user');
+      localStorage.removeItem("user");
     }
   }, [user]);
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post('/api/users/login', { email, password });
+      const res = await axios.post("/api/users/login", { email, password });
       setUser(res.data.user);
       setToken(res.data.token);
       return { success: true };
     } catch (error) {
       console.error(error);
-      return { success: false, message: error.response?.data?.message || 'Login failed' };
+      return {
+        success: false,
+        message: error.response?.data?.message || "Login failed",
+      };
     }
   };
 
   const register = async (username, email, password) => {
     try {
-      const res = await axios.post('/api/users/register', { username, email, password });
+      const res = await axios.post("/api/users/register", {
+        username,
+        email,
+        password,
+      });
       setUser(res.data.user);
       setToken(res.data.token);
       return { success: true };
     } catch (error) {
       console.error(error);
-      return { success: false, message: error.response?.data?.message || 'Registration failed' };
+      return {
+        success: false,
+        message: error.response?.data?.message || "Registration failed",
+      };
     }
   };
 
   const logout = () => {
     setUser(null);
-    setToken('');
+    setToken("");
   };
 
   return (
@@ -67,4 +80,8 @@ export const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };

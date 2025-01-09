@@ -5,8 +5,17 @@ import PropTypes from 'prop-types';
 
 const TaskItem = ({ task, fetchTasks }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const [editTitle, setEditTitle] = useState(task.title);
-  const [editDescription, setEditDescription] = useState(task.description);
+  const [editData, setEditData] = useState({
+    title: task.title,
+    description: task.description,
+    category: task.category,
+    dueDate: task.dueDate ? task.dueDate.split('T')[0] : '',
+  });
+
+  const { title, description, category, dueDate } = editData;
+
+  const onChange = (e) =>
+    setEditData({ ...editData, [e.target.name]: e.target.value });
 
   const toggleCompletion = async () => {
     try {
@@ -30,8 +39,10 @@ const TaskItem = ({ task, fetchTasks }) => {
     e.preventDefault();
     try {
       await axios.patch(`/api/tasks/${task._id}`, {
-        title: editTitle,
-        description: editDescription,
+        title,
+        description,
+        category,
+        dueDate: dueDate ? new Date(dueDate) : null,
       });
       setIsEditing(false);
       fetchTasks();
@@ -46,42 +57,79 @@ const TaskItem = ({ task, fetchTasks }) => {
         <form onSubmit={updateTask} className="flex flex-col space-y-2">
           <input
             type="text"
+            name="title"
             className="p-2 border rounded"
-            value={editTitle}
-            onChange={(e) => setEditTitle(e.target.value)}
+            value={title}
+            onChange={onChange}
             required
           />
           <textarea
+            name="description"
             className="p-2 border rounded"
-            value={editDescription}
-            onChange={(e) => setEditDescription(e.target.value)}
+            value={description}
+            onChange={onChange}
           ></textarea>
+          <select
+            name="category"
+            className="p-2 border rounded"
+            value={category}
+            onChange={onChange}
+          >
+            <option value="Work">Work</option>
+            <option value="Personal">Personal</option>
+            <option value="Others">Others</option>
+          </select>
+          <input
+            type="date"
+            name="dueDate"
+            className="p-2 border rounded"
+            value={dueDate}
+            onChange={onChange}
+          />
           <div className="flex space-x-2">
             <button
               type="submit"
-              className="bg-green-500 text-white p-2 rounded hover:bg-green-600 flex-1"
+              className="bg-green-500 text-white p-2 rounded hover:bg-green-600 flex-1 flex items-center justify-center"
             >
-              <FaCheck /> Save
+              <FaCheck className="mr-1" /> Save
             </button>
             <button
               type="button"
-              className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 flex-1"
+              className="bg-gray-500 text-white p-2 rounded hover:bg-gray-600 flex-1 flex items-center justify-center"
               onClick={() => setIsEditing(false)}
             >
-              <FaTimes /> Cancel
+              <FaTimes className="mr-1" /> Cancel
             </button>
           </div>
         </form>
       ) : (
         <>
           <div className="flex justify-between items-center">
-            <h3 className={`text-lg font-semibold ${task.completed ? 'line-through text-green-600' : ''}`}>
-              {task.title}
-            </h3>
+            <div>
+              <h3
+                className={`text-lg font-semibold ${
+                  task.completed ? 'line-through text-green-600' : ''
+                }`}
+              >
+                {task.title}
+              </h3>
+              {task.category && (
+                <span className="text-sm text-gray-500">{task.category}</span>
+              )}
+              {task.dueDate && (
+                <span className="text-sm text-gray-500">
+                  Due: {new Date(task.dueDate).toLocaleDateString()}
+                </span>
+              )}
+            </div>
             <div className="flex space-x-2">
               <button
                 onClick={toggleCompletion}
-                className={`p-2 rounded ${task.completed ? 'bg-yellow-500 hover:bg-yellow-600' : 'bg-green-500 hover:bg-green-600'}`}
+                className={`p-2 rounded ${
+                  task.completed
+                    ? 'bg-yellow-500 hover:bg-yellow-600'
+                    : 'bg-green-500 hover:bg-green-600'
+                }`}
                 title={task.completed ? 'Mark as Incomplete' : 'Mark as Complete'}
               >
                 {task.completed ? <FaTimes /> : <FaCheck />}
@@ -102,7 +150,9 @@ const TaskItem = ({ task, fetchTasks }) => {
               </button>
             </div>
           </div>
-          {task.description && <p className="mt-2 text-gray-700">{task.description}</p>}
+          {task.description && (
+            <p className="mt-2 text-gray-700">{task.description}</p>
+          )}
         </>
       )}
     </div>
@@ -116,6 +166,8 @@ TaskItem.propTypes = {
     _id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     description: PropTypes.string,
+    category: PropTypes.string,
+    dueDate: PropTypes.string,
     completed: PropTypes.bool.isRequired,
   }).isRequired,
   fetchTasks: PropTypes.func.isRequired,
